@@ -8,6 +8,7 @@
 /build
 /build-*
 /.vs
+/out
 
 # Build files
 *.a
@@ -27,3 +28,6 @@ version.c
 # Runtime generated cruft
 *.sav
 *.ss0
+
+# generated zlib config
+src/third-party/zlib/zconf.h.included
