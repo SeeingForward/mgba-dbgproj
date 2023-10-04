@@ -34,6 +34,7 @@ class ConfigController;
 class CoreController;
 class CoreManager;
 class DebuggerConsoleController;
+class DebuggerGUIController;
 class Display;
 class DolphinConnector;
 class FrameView;
@@ -110,6 +111,7 @@ public slots:
 
 #ifdef USE_DEBUGGERS
 	void consoleOpen();
+	void debugGUIOpen();
 #endif
 
 #ifdef USE_GDB_STUB
@@ -208,6 +210,7 @@ private:
 	LogView* m_logView;
 #ifdef USE_DEBUGGERS
 	DebuggerConsoleController* m_console = nullptr;
+	DebuggerGUIController* m_guiController = nullptr;
 #endif
 	LoadSaveState* m_stateWindow = nullptr;
 	WindowBackground* m_screenWidget;

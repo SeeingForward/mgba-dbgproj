@@ -166,6 +166,7 @@ set(UI_FILES
 	BattleChipView.ui
 	CheatsView.ui
 	DebuggerConsole.ui
+	DebuggerGUI.ui
 	DolphinConnector.ui
 	ForwarderView.ui
 	FrameView.ui
@@ -248,7 +249,9 @@ if(USE_DEBUGGERS)
 	list(APPEND SOURCE_FILES
 		DebuggerController.cpp
 		DebuggerConsole.cpp
-		DebuggerConsoleController.cpp)
+		DebuggerConsoleController.cpp
+		DebuggerGUI.cpp
+		DebuggerGUIController.cpp)
 endif()
 
 if(USE_GDB_STUB)

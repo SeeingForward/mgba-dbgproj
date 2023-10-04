@@ -27,6 +27,8 @@
 #include "CoreController.h"
 #include "DebuggerConsole.h"
 #include "DebuggerConsoleController.h"
+#include "DebuggerGUI.h"
+#include "DebuggerGUIController.h"
 #include "Display.h"
 #include "DolphinConnector.h"
 #include "CoreController.h"
@@ -622,6 +624,18 @@ void Window::consoleOpen() {
 	DebuggerConsole* window = new DebuggerConsole(m_console);
 	if (m_controller) {
 		m_console->setController(m_controller);
+	}
+	openView(window);
+}
+
+void Window::debugGUIOpen() {
+	if (!m_guiController) {
+		m_guiController = new DebuggerGUIController(this);
+	}
+
+	DebuggerGUI* window = new DebuggerGUI(m_guiController);
+	if (m_guiController) {
+		m_guiController->setController(m_controller);
 	}
 	openView(window);
 }
@@ -1672,6 +1686,7 @@ void Window::setupMenu(QMenuBar* menubar) {
 	m_actions.addSeparator("tools");
 #ifdef USE_DEBUGGERS
 	m_actions.addAction(tr("Open debugger console..."), "debuggerWindow", this, &Window::consoleOpen, "tools");
+	m_actions.addAction(tr("Open debugger GUI..."), "debuggerGUI", this, &Window::debugGUIOpen, "tools");
 #ifdef USE_GDB_STUB
 	auto gdbWindow = addGameAction(tr("Start &GDB server..."), "gdbWindow", this, &Window::gdbOpen, "tools");
 	m_platformActions.insert(mPLATFORM_GBA, gdbWindow);
