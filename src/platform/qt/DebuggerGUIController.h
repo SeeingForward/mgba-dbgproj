@@ -12,6 +12,7 @@
 #include <QWaitCondition>
 
 #include <mgba/internal/debugger/cli-debugger.h>
+#include "mgba/internal/arm/arm.h"
 
 namespace QGBA {
 
@@ -30,10 +31,12 @@ signals:
 	void lineAppend(const QString&);
 
 public slots:
+	struct ARMRegisterFile* getGbaRegisters();
 	void enterLine(const QString&);
 	virtual void detach() override;
 	void historyLoad();
 	void historySave();
+	std::shared_ptr<CoreController> getCoreController();
 
 protected:
 	virtual void attachInternal() override;

@@ -6,51 +6,91 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>480</width>
-    <height>500</height>
+    <width>512</width>
+    <height>497</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Debugger GUI</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="0">
-    <widget class="QLineEdit" name="prompt">
-     <property name="placeholderText">
-      <string>New Test-String was placed here!</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="breakpoint">
-     <property name="text">
-      <string>Break</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0">
-    <widget class="QGBA::LogWidget" name="log">
-     <property name="readOnly">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-	<item row="0" column="1" alignment="Qt::AlignTop">
-		<widget class="QLabel" name="registers">
-			<property name="text">
-				<string>Registers:</string>
-			</property>
-		</widget>
-	</item>
-  </layout>
+  <widget class="QPlainTextEdit" name="log">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>371</width>
+     <height>291</height>
+    </rect>
+   </property>
+   <property name="readOnly">
+    <bool>true</bool>
+   </property>
+  </widget>
+  <widget class="QLabel" name="registers">
+   <property name="geometry">
+    <rect>
+     <x>391</x>
+     <y>9</y>
+     <width>101</width>
+     <height>281</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Registers:</string>
+   </property>
+   <property name="alignment">
+    <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
+   </property>
+  </widget>
+  <widget class="QTableView" name="watchWindow">
+   <property name="geometry">
+    <rect>
+     <x>9</x>
+     <y>313</y>
+     <width>301</width>
+     <height>171</height>
+    </rect>
+   </property>
+   <property name="baseSize">
+    <size>
+     <width>2</width>
+     <height>1</height>
+    </size>
+   </property>
+   <property name="sortingEnabled">
+    <bool>true</bool>
+   </property>
+   <attribute name="verticalHeaderShowSortIndicator" stdset="0">
+    <bool>false</bool>
+   </attribute>
+  </widget>
+  <widget class="QPushButton" name="pushButton">
+   <property name="geometry">
+    <rect>
+     <x>380</x>
+     <y>280</y>
+     <width>80</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Source View</string>
+   </property>
+  </widget>
+  <widget class="QPlainTextEdit" name="plainTextEdit">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>310</y>
+     <width>181</width>
+     <height>171</height>
+    </rect>
+   </property>
+   <property name="plainText">
+    <string>Breakpoints</string>
+   </property>
+  </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QGBA::LogWidget</class>
-   <extends>QPlainTextEdit</extends>
-   <header>LogWidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>

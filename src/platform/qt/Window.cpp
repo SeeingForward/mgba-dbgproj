@@ -634,7 +634,7 @@ void Window::debugGUIOpen() {
 	}
 
 	DebuggerGUI* window = new DebuggerGUI(m_guiController);
-	if (m_guiController) {
+	if (m_controller) {
 		m_guiController->setController(m_controller);
 	}
 	openView(window);
@@ -2048,6 +2048,7 @@ void Window::updateFrame() {
 	if (!m_controller) {
 		return;
 	}
+
 	QPixmap pixmap;
 	pixmap.convertFromImage(m_controller->getPixels());
 	m_screenWidget->setPixmap(pixmap);
@@ -2173,6 +2174,10 @@ void Window::setController(CoreController* controller, const QString& fname) {
 		m_scripting->setVideoBackend(m_display->videoBackend());
 	}
 #endif
+
+	if (m_guiController) {
+		m_guiController->setController(m_controller);
+	}
 
 	attachDisplay();
 	m_controller->loadConfig(m_config);

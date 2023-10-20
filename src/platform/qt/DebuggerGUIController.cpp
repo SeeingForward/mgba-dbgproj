@@ -13,6 +13,8 @@
 #include <QThread>
 
 #include <mgba/internal/debugger/cli-debugger.h>
+#include <mgba/internal/gba/gba.h>
+#include <mgba/internal/arm/arm.h>
 
 using namespace QGBA;
 
@@ -34,6 +36,24 @@ DebuggerGUIController::DebuggerGUIController(QObject* parent)
 	CLIDebuggerAttachBackend(&m_cliDebugger, &m_backend);
 }
 
+std::shared_ptr<CoreController> DebuggerGUIController::getCoreController() {
+	CoreController::Interrupter interrupter(m_gameController);
+	return m_gameController;
+}
+
+struct ARMRegisterFile *DebuggerGUIController::getGbaRegisters() {
+	// Interrupt the emulation loop
+	CoreController::Interrupter interrupter(m_gameController);
+	QMutexLocker lock(&m_mutex);
+
+	if (m_gameController) {
+		GBA *gba = static_cast<GBA*>(m_gameController->thread()->core->board);
+		return &gba->cpu->regs;
+	}
+
+	return NULL;
+}
+
 void DebuggerGUIController::enterLine(const QString& line) {
 	CoreController::Interrupter interrupter(m_gameController);
 	QMutexLocker lock(&m_mutex);
@@ -48,7 +68,7 @@ void DebuggerGUIController::detach() {
 	{
 		CoreController::Interrupter interrupter(m_gameController);
 		QMutexLocker lock(&m_mutex);
-		if (m_cliDebugger.d.p->state != DEBUGGER_SHUTDOWN) {
+		if (m_cliDebugger.d.p && m_cliDebugger.d.p->state != DEBUGGER_SHUTDOWN) {
 			m_lines.append(QString());
 			m_cond.wakeOne();
 		}
