@@ -13,7 +13,7 @@
   <property name="windowTitle">
    <string>Debugger GUI</string>
   </property>
-  <widget class="QPlainTextEdit" name="log">
+  <widget class="QGBA::LogWidget" name="log">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -21,6 +21,9 @@
      <width>371</width>
      <height>291</height>
     </rect>
+   </property>
+   <property name="lineWrapMode">
+    <enum>QPlainTextEdit::NoWrap</enum>
    </property>
    <property name="readOnly">
     <bool>true</bool>
@@ -91,6 +94,13 @@
    </property>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>QGBA::LogWidget</class>
+   <extends>QPlainTextEdit</extends>
+   <header>LogWidget.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

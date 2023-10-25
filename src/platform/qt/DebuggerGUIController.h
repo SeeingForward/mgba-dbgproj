@@ -52,6 +52,7 @@ private:
 	static void historyAppend(struct CLIDebuggerBackend* be, const char* line);
 	static void interrupt(struct CLIDebuggerBackend* be);
 
+
 	CLIDebugger m_cliDebugger{};
 
 	QMutex m_mutex;
@@ -59,6 +60,8 @@ private:
 	QStringList m_history;
 	QStringList m_lines;
 	QByteArray m_last;
+
+	uint32_t m_addr;
 
 	struct Backend : public CLIDebuggerBackend {
 		DebuggerGUIController* self;

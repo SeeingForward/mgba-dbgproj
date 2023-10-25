@@ -16,6 +16,9 @@ Q_OBJECT
 
 public:
 	DebuggerGUI(DebuggerGUIController* controller, QWidget* parent = nullptr);
+	void DebuggerGUI::PrintCode(uint32_t startAddress = 0);
+
+signals:
 
 private:
 	Ui::DebuggerGUI m_ui;
