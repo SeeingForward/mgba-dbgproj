@@ -633,7 +633,7 @@ void Window::debugGUIOpen() {
 		m_guiController = new DebuggerGUIController(this);
 	}
 
-	DebuggerGUI* window = new DebuggerGUI(m_guiController);
+	DebuggerGUI* window = new DebuggerGUI(m_guiController, m_controller);
 	if (m_controller) {
 		m_guiController->setController(m_controller);
 	}

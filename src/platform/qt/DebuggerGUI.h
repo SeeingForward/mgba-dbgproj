@@ -7,6 +7,8 @@
 
 #include "ui_DebuggerGUI.h"
 
+#include "CoreController.h"
+
 namespace QGBA {
 
 class DebuggerGUIController;
@@ -15,8 +17,19 @@ class DebuggerGUI : public QWidget {
 Q_OBJECT
 
 public:
-	DebuggerGUI(DebuggerGUIController* controller, QWidget* parent = nullptr);
+DebuggerGUI(DebuggerGUIController* controller, QWidget* parent = nullptr);
+DebuggerGUI(DebuggerGUIController* controller,
+			std::shared_ptr<CoreController> coreController,
+	        QWidget* parent = nullptr);
 	void DebuggerGUI::PrintCode(uint32_t startAddress = 0);
+
+public slots:
+	void DebuggerGUI::HandleGamePause();
+	void DebuggerGUI::HandleGameResume();
+	void DebuggerGUI::UpdateWidgets();
+	void DebuggerGUI::UpdateRegister(int index);
+	void DebuggerGUI::UpdateRegisters();
+	void DebuggerGUI::HandleChangedRegisterCell(int row, int column);
 
 signals:
 

@@ -36,7 +36,6 @@ public slots:
 	virtual void detach() override;
 	void historyLoad();
 	void historySave();
-	std::shared_ptr<CoreController> getCoreController();
 
 protected:
 	virtual void attachInternal() override;

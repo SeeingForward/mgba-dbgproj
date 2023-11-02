@@ -36,11 +36,6 @@ DebuggerGUIController::DebuggerGUIController(QObject* parent)
 	CLIDebuggerAttachBackend(&m_cliDebugger, &m_backend);
 }
 
-std::shared_ptr<CoreController> DebuggerGUIController::getCoreController() {
-	CoreController::Interrupter interrupter(m_gameController);
-	return m_gameController;
-}
-
 struct ARMRegisterFile *DebuggerGUIController::getGbaRegisters() {
 	// Interrupt the emulation loop
 	CoreController::Interrupter interrupter(m_gameController);
