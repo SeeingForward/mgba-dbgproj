@@ -49,6 +49,16 @@ struct ARMRegisterFile *DebuggerGUIController::getGbaRegisters() {
 	return NULL;
 }
 
+void DebuggerGUIController::setGbaRegister(uint8_t regId, uint32_t value) {
+	CoreController::Interrupter interrupter(m_gameController);
+	QMutexLocker lock(&m_mutex);
+
+	if (regId < 16) {
+		GBA* gba = static_cast<GBA*>(m_gameController->thread()->core->board);
+		gba->cpu->regs.gprs[regId] = value;
+	}
+}
+
 void DebuggerGUIController::enterLine(const QString& line) {
 	CoreController::Interrupter interrupter(m_gameController);
 	QMutexLocker lock(&m_mutex);

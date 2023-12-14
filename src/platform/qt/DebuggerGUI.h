@@ -5,6 +5,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 #pragma once
 
+#include <QTimer>
+
 #include "ui_DebuggerGUI.h"
 
 #include "CoreController.h"
@@ -35,8 +37,14 @@ signals:
 
 private:
 	Ui::DebuggerGUI m_ui;
+	
+	// If paused, allow user to edit values
+	bool m_paused = false;
+
+	uint32_t m_codeAddress;
 
 	DebuggerGUIController* m_guiController;
+	std::shared_ptr<CoreController> m_CoreController;
 };
 
 }

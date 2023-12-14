@@ -19,7 +19,7 @@
      <x>10</x>
      <y>10</y>
      <width>371</width>
-     <height>371</height>
+     <height>131</height>
     </rect>
    </property>
    <property name="lineWrapMode">
@@ -76,7 +76,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QPushButton" name="pushButton">
+  <widget class="QPushButton" name="btnSource">
    <property name="geometry">
     <rect>
      <x>390</x>
@@ -125,6 +125,9 @@
    </property>
    <property name="sizeAdjustPolicy">
     <enum>QAbstractScrollArea::AdjustToContents</enum>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
    </property>
    <property name="wordWrap">
     <bool>false</bool>
@@ -306,6 +309,52 @@
      <string>0x00000000</string>
     </property>
    </item>
+  </widget>
+  <widget class="QListWidget" name="listWidget">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>150</y>
+     <width>371</width>
+     <height>201</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>360</y>
+     <width>49</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Address:</string>
+   </property>
+  </widget>
+  <widget class="QLineEdit" name="addressLine">
+   <property name="geometry">
+    <rect>
+     <x>60</x>
+     <y>360</y>
+     <width>113</width>
+     <height>24</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QPushButton" name="btnGoTo">
+   <property name="geometry">
+    <rect>
+     <x>180</x>
+     <y>360</y>
+     <width>41</width>
+     <height>24</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Go To</string>
+   </property>
   </widget>
  </widget>
  <customwidgets>

@@ -25,13 +25,14 @@ public:
 	DebuggerGUIController(QObject* parent = nullptr);
 
 	QStringList history() const { return m_history; }
+	struct ARMRegisterFile* getGbaRegisters();
+	void DebuggerGUIController::setGbaRegister(uint8_t regId, uint32_t value);
 
 signals:
 	void log(const QString&);
 	void lineAppend(const QString&);
 
 public slots:
-	struct ARMRegisterFile* getGbaRegisters();
 	void enterLine(const QString&);
 	virtual void detach() override;
 	void historyLoad();
