@@ -6,6 +6,7 @@
 #ifndef CLI_DEBUGGER_H
 #define CLI_DEBUGGER_H
 
+#include <mgba/internal/arm/decoder.h>
 #include <mgba-util/common.h>
 
 CXX_GUARD_START

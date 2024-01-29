@@ -11,6 +11,7 @@
 #include "GBAApp.h"
 
 #include "mgba/internal/arm/arm.h"
+#include "mgba/internal/gba/memory.h" // GBALoad8/16/32
 
 #include <QKeyEvent>
 #include <qt5/QtWidgets/qlineedit.h>
@@ -26,10 +27,8 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 	: QWidget(parent)
 	, m_guiController(controller)
     , m_CoreController(coreController)
-    , m_codeAddress(GBA_ROM_BASE) {
+    , m_codeAddress(GBA_ROM_BASE + 0xC0) {
 	m_ui.setupUi(this);
-
-	connect(controller, &DebuggerGUIController::log, m_ui.log, &LogWidget::log);
 
 	connect(m_ui.registers, &QTableWidget::cellChanged, this, &DebuggerGUI::HandleChangedRegisterCell);
 
@@ -54,9 +53,7 @@ void DebuggerGUI::HandleChangedRegisterCell(int row, int column) {
 		bool userCanEdit = !m_ui.registers->editTriggers().testFlag(QAbstractItemView::EditTrigger::NoEditTriggers);
 
 
-		if (m_paused && userCanEdit && column == 0 && row < GBA_GPR_COUNT) {
-			m_guiController->log(QString("(%1, %2) changed\n").arg(row).arg(column));
-			
+		if (m_paused && userCanEdit && column == 0 && row < GBA_GPR_COUNT) {			
 			QString regValue = m_ui.registers->item(row, column)->text();
 
 			uint32_t value;
@@ -117,9 +114,7 @@ void DebuggerGUI::UpdateWidgets() {
 }
 
 void DebuggerGUI::PrintCode(quint32 startAddress) {
-	// Test disassembling instructions
 	bool printAsm = false;
-	bool isThumb = true;
 	bool debugInfoLoaded = false;
 
 	if (!printAsm) {
@@ -136,24 +131,38 @@ void DebuggerGUI::PrintCode(quint32 startAddress) {
 
 	if (printAsm)
 	{
-		m_guiController->attach();
+		if (m_CoreController) {
+			auto core	 = m_CoreController.get()->thread()->core;
+			auto cpu	 = (struct ARMCore*) core->cpu;
+			const bool isThumb = FALSE; // (cpu->executionMode == MODE_THUMB);
 
-		QString cpuMode = (isThumb) ? "t" : "a";
+			// Find out how many code lines to display
+			int listHeight        = m_ui.listWidget->height();
+			int listFontHeight    = m_ui.listWidget->font().pointSize();
+			int visibleLinesCount = (listHeight / (1.8f * listFontHeight)) - 1;
 
-		// TOOD: Handle bl instructions
-		int instrSize   = (isThumb) ? 2 : 4;
+			const int instrSize   = (isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
 
-		for (int i = 0; i < 16; i++) {
-			QString instr = "disassemble/";
-			instr.append(cpuMode);
-			instr.append(" ");
-			instr.append(QStringLiteral("0x%1").arg(startAddress + i*instrSize, 0, 16));
-			m_guiController->enterLine(instr);
+			char instrBuffer[128] = { 0 };
+
+			QString instr = "";
+			struct ARMInstructionInfo info;
+			for (int i = 0; i < visibleLinesCount; i++) {
+				uint32_t address = startAddress + i * instrSize;
+				// uint32_t address = cpu->regs.gprs[15] + i * 2;
+
+				if (isThumb) {
+					uint16_t opcode = GBALoad16(cpu, address, NULL);
+					ARMDecodeThumb(opcode, &info);
+				} else {
+					uint32_t opcode = GBALoad32(cpu, address, NULL);
+					ARMDecodeARM(opcode, &info);
+				}
+
+				ARMDisassemble(&info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
+				instr.sprintf("0x%08X: %s", address, instrBuffer);
+				m_ui.listWidget->addItem(instr);
+			}
 		}
-
-		// Continue emulator execution
-		m_guiController->enterLine("c");
-
-		m_guiController->detach();
 	}
 }

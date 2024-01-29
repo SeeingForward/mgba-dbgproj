@@ -13,22 +13,6 @@
   <property name="windowTitle">
    <string>Debugger GUI</string>
   </property>
-  <widget class="QGBA::LogWidget" name="log">
-   <property name="geometry">
-    <rect>
-     <x>10</x>
-     <y>10</y>
-     <width>371</width>
-     <height>131</height>
-    </rect>
-   </property>
-   <property name="lineWrapMode">
-    <enum>QPlainTextEdit::NoWrap</enum>
-   </property>
-   <property name="readOnly">
-    <bool>true</bool>
-   </property>
-  </widget>
   <widget class="QTableWidget" name="watchWindow">
    <property name="geometry">
     <rect>
@@ -77,6 +61,9 @@
    </item>
   </widget>
   <widget class="QPushButton" name="btnSource">
+   <property name="enabled">
+    <bool>false</bool>
+   </property>
    <property name="geometry">
     <rect>
      <x>390</x>
@@ -314,10 +301,16 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>150</y>
+     <y>10</y>
      <width>371</width>
-     <height>201</height>
+     <height>341</height>
     </rect>
+   </property>
+   <property name="font">
+    <font>
+     <family>Consolas</family>
+     <pointsize>8</pointsize>
+    </font>
    </property>
   </widget>
   <widget class="QLabel" name="label">
@@ -357,13 +350,6 @@
    </property>
   </widget>
  </widget>
- <customwidgets>
-  <customwidget>
-   <class>QGBA::LogWidget</class>
-   <extends>QPlainTextEdit</extends>
-   <header>LogWidget.h</header>
-  </customwidget>
- </customwidgets>
  <resources/>
  <connections/>
 </ui>
