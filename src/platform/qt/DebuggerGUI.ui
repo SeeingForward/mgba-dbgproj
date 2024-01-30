@@ -79,7 +79,7 @@
     <string>Source</string>
    </property>
   </widget>
-  <widget class="QPlainTextEdit" name="plainTextEdit">
+  <widget class="QPlainTextEdit" name="txtBreakpoints">
    <property name="geometry">
     <rect>
      <x>320</x>
@@ -297,7 +297,7 @@
     </property>
    </item>
   </widget>
-  <widget class="QListWidget" name="listWidget">
+  <widget class="QListWidget" name="listCode">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -326,7 +326,7 @@
     <string>Address:</string>
    </property>
   </widget>
-  <widget class="QLineEdit" name="addressLine">
+  <widget class="QLineEdit" name="txtAddressLine">
    <property name="geometry">
     <rect>
      <x>60</x>
@@ -347,6 +347,19 @@
    </property>
    <property name="text">
     <string>Go To</string>
+   </property>
+  </widget>
+  <widget class="QCheckBox" name="chkThumb">
+   <property name="geometry">
+    <rect>
+     <x>230</x>
+     <y>360</y>
+     <width>101</width>
+     <height>22</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Thumb-Code</string>
    </property>
   </widget>
  </widget>

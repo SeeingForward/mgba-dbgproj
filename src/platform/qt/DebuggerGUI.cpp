@@ -27,24 +27,79 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 	: QWidget(parent)
 	, m_guiController(controller)
     , m_CoreController(coreController)
-    , m_codeAddress(GBA_ROM_BASE + 0xC0) {
+    , m_codeAddress(GBA_ROM_BASE) {
 	m_ui.setupUi(this);
 
 	connect(m_ui.registers, &QTableWidget::cellChanged, this, &DebuggerGUI::HandleChangedRegisterCell);
+	connect(m_ui.btnGoTo,   &QPushButton::clicked,      this, &DebuggerGUI::HandleAddressButtonClicked);
+	connect(m_ui.chkThumb,  &QAbstractButton::clicked,  this, &DebuggerGUI::HandleThumbCheckboxClicked);
 
 	if (coreController) {
 		auto coreCnt = coreController.get();
 		connect(coreCnt, &CoreController::started,  this, &DebuggerGUI::UpdateWidgets);
-		connect(coreCnt, &CoreController::stopping, this, &DebuggerGUI::HandleGamePause);
 		connect(coreCnt, &CoreController::paused,   this, &DebuggerGUI::HandleGamePause);
 		connect(coreCnt, &CoreController::unpaused, this, &DebuggerGUI::HandleGameResume);
 		connect(coreCnt, &CoreController::frameAvailable, this, &DebuggerGUI::UpdateWidgets);
 
 		// TODO: This makes the Resume-connect pointless, since we enable editing by clicking the Table
 		//connect(m_ui.registers, &QTableView::clicked, this, &DebuggerGUI::HandleGamePause);
+
+		// Find the target of the very first instruction, which has got to be a branch in official games.
+		struct ARMInstructionInfo info;
+		struct ARMCore* cpu = (struct ARMCore*)coreCnt->thread()->core->cpu;
+		uint32_t opcode     = GBALoad32(cpu, m_codeAddress, NULL);
+
+		ARMDecodeARM(opcode, &info);
+
+		if (info.mnemonic == ARM_MN_B || info.mnemonic == ARM_MN_BL) {
+			int offset = info.op1.reg + 0x8;
+			m_codeAddress += offset;
+		}
 	}
 
+	QString hex("0x");
+	hex.append(QString("%1").arg(m_codeAddress, 8, 16, QLatin1Char('0')).toUpper());
+	m_ui.txtAddressLine->setText(hex);
+	
 	PrintCode(m_codeAddress);
+}
+
+void DebuggerGUI::HandleThumbCheckboxClicked(bool checked) {
+	m_isThumb = checked;
+	PrintCode(m_codeAddress);
+}
+
+void DebuggerGUI::HandleAddressButtonClicked(bool checked) {
+	// Get address value from textbox
+	QString line     = m_ui.txtAddressLine->text();
+	uint32_t address = 0;
+
+	if (line.contains("0x")) {
+		QStringList sl = line.split("0x");
+		address = sl.takeLast().toInt(0, 16);
+	} else if (!line.isEmpty()) {
+		address = line.toInt(0, 16);
+	} else {
+		return;
+	}
+
+	if (address != 0) {
+		int linesCount      = m_ui.listCode->count();
+		int wordSize        = (m_isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
+		uint32_t endAddress = m_codeAddress + linesCount * wordSize;
+		
+		// If the target line is already visible, just select it.
+		if (address >= m_codeAddress && address < endAddress) {
+			int selected = (address - m_codeAddress) / wordSize;
+			m_ui.listCode->setItemSelected(m_ui.listCode->item(selected), true);
+		} else {
+			m_codeAddress = address;
+			PrintCode(m_codeAddress);
+		}
+	} else {
+		m_codeAddress = address;
+		PrintCode(m_codeAddress);
+	}
 }
 
 void DebuggerGUI::HandleChangedRegisterCell(int row, int column) {
@@ -113,7 +168,18 @@ void DebuggerGUI::UpdateWidgets() {
 	UpdateRegisters();
 }
 
+// Find out how many code lines to display
+int DebuggerGUI::getVisibleCodeLinesCount() {
+	int listHeight		  = m_ui.listCode->height();
+	int listFontHeight	  = m_ui.listCode->font().pointSize();
+	int visibleLinesCount = (listHeight / (1.8f * listFontHeight)) - 1;
+
+	return visibleLinesCount;
+}
+
 void DebuggerGUI::PrintCode(quint32 startAddress) {
+	m_ui.listCode->clear();
+
 	bool printAsm = false;
 	bool debugInfoLoaded = false;
 
@@ -134,12 +200,9 @@ void DebuggerGUI::PrintCode(quint32 startAddress) {
 		if (m_CoreController) {
 			auto core	 = m_CoreController.get()->thread()->core;
 			auto cpu	 = (struct ARMCore*) core->cpu;
-			const bool isThumb = FALSE; // (cpu->executionMode == MODE_THUMB);
+			const bool isThumb = m_isThumb;
 
-			// Find out how many code lines to display
-			int listHeight        = m_ui.listWidget->height();
-			int listFontHeight    = m_ui.listWidget->font().pointSize();
-			int visibleLinesCount = (listHeight / (1.8f * listFontHeight)) - 1;
+			int visibleLinesCount = getVisibleCodeLinesCount();
 
 			const int instrSize   = (isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
 
@@ -161,7 +224,7 @@ void DebuggerGUI::PrintCode(quint32 startAddress) {
 
 				ARMDisassemble(&info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
 				instr.sprintf("0x%08X: %s", address, instrBuffer);
-				m_ui.listWidget->addItem(instr);
+				m_ui.listCode->addItem(instr);
 			}
 		}
 	}

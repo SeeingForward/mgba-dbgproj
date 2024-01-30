@@ -32,15 +32,21 @@ public slots:
 	void DebuggerGUI::UpdateRegister(int index);
 	void DebuggerGUI::UpdateRegisters();
 	void DebuggerGUI::HandleChangedRegisterCell(int row, int column);
+	void DebuggerGUI::HandleAddressButtonClicked(bool checked);
+	void DebuggerGUI::HandleThumbCheckboxClicked(bool checked);
 
 signals:
 
 private:
+	int getVisibleCodeLinesCount(void);
+
 	Ui::DebuggerGUI m_ui;
 	
 	// If paused, allow user to edit values
 	bool m_paused = false;
+	bool m_isThumb = false; // ARM-Mode or Thumb-Mode
 
+	// Address of the first line in the assembly view
 	uint32_t m_codeAddress;
 
 	DebuggerGUIController* m_guiController;
