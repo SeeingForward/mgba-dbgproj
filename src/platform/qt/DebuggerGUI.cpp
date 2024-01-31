@@ -34,6 +34,8 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 	connect(m_ui.btnGoTo,   &QPushButton::clicked,      this, &DebuggerGUI::HandleAddressButtonClicked);
 	connect(m_ui.chkThumb,  &QAbstractButton::clicked,  this, &DebuggerGUI::HandleThumbCheckboxClicked);
 
+	connect(m_ui.txtAddressLine, &QLineEdit::returnPressed, this, &DebuggerGUI::HandleAddressLineReturnPressed);
+
 	if (coreController) {
 		auto coreCnt = coreController.get();
 		connect(coreCnt, &CoreController::started,  this, &DebuggerGUI::UpdateWidgets);
@@ -67,6 +69,10 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 void DebuggerGUI::HandleThumbCheckboxClicked(bool checked) {
 	m_isThumb = checked;
 	PrintCode(m_codeAddress);
+}
+
+void DebuggerGUI::HandleAddressLineReturnPressed() {
+	HandleAddressButtonClicked(true);
 }
 
 void DebuggerGUI::HandleAddressButtonClicked(bool checked) {

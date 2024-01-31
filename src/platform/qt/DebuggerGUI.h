@@ -33,6 +33,7 @@ public slots:
 	void DebuggerGUI::UpdateRegisters();
 	void DebuggerGUI::HandleChangedRegisterCell(int row, int column);
 	void DebuggerGUI::HandleAddressButtonClicked(bool checked);
+	void DebuggerGUI::HandleAddressLineReturnPressed();
 	void DebuggerGUI::HandleThumbCheckboxClicked(bool checked);
 
 signals:
