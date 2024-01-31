@@ -18,7 +18,7 @@
     <rect>
      <x>9</x>
      <y>390</y>
-     <width>301</width>
+     <width>281</width>
      <height>171</height>
     </rect>
    </property>
@@ -77,19 +77,6 @@
    </property>
    <property name="text">
     <string>Source</string>
-   </property>
-  </widget>
-  <widget class="QPlainTextEdit" name="txtBreakpoints">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>390</y>
-     <width>261</width>
-     <height>171</height>
-    </rect>
-   </property>
-   <property name="plainText">
-    <string>Breakpoints</string>
    </property>
   </widget>
   <widget class="QTableWidget" name="registers">
@@ -218,82 +205,82 @@
    </column>
    <item row="0" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="1" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="2" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="3" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="4" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="5" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="6" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="7" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="8" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="9" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="10" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="11" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="12" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="13" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="14" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
    <item row="15" column="0">
     <property name="text">
-     <string>0x00000000</string>
+     <string/>
     </property>
    </item>
   </widget>
@@ -313,7 +300,7 @@
     </font>
    </property>
   </widget>
-  <widget class="QLabel" name="label">
+  <widget class="QLabel" name="labelGotoAddress">
    <property name="geometry">
     <rect>
      <x>10</x>
@@ -360,6 +347,29 @@
    </property>
    <property name="text">
     <string>Thumb-Code</string>
+   </property>
+  </widget>
+  <widget class="QListWidget" name="listBreakpoints">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>410</y>
+     <width>261</width>
+     <height>151</height>
+    </rect>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelBreakpoints">
+   <property name="geometry">
+    <rect>
+     <x>320</x>
+     <y>390</y>
+     <width>71</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="text">
+    <string>Breakpoints</string>
    </property>
   </widget>
  </widget>
