@@ -75,8 +75,7 @@ void DebuggerGUI::HandleAddressButtonClicked(bool checked) {
 	uint32_t address = 0;
 
 	if (line.contains("0x")) {
-		QStringList sl = line.split("0x");
-		address = sl.takeLast().toInt(0, 16);
+		address = line.remove("0x", Qt::CaseInsensitive).toInt(nullptr, 16);
 	} else if (!line.isEmpty()) {
 		address = line.toInt(0, 16);
 	} else {
@@ -210,18 +209,30 @@ void DebuggerGUI::PrintCode(quint32 startAddress) {
 
 			QString instr = "";
 			struct ARMInstructionInfo info;
-			for (int i = 0; i < visibleLinesCount; i++) {
-				uint32_t address = startAddress + i * instrSize;
-				// uint32_t address = cpu->regs.gprs[15] + i * 2;
+			for (int i = 0, instrIndex = 0; i < visibleLinesCount; i++, instrIndex++) {
+				uint32_t address = startAddress + (instrIndex * instrSize);
 
 				if (isThumb) {
-					uint16_t opcode = GBALoad16(cpu, address, NULL);
+					uint16_t opcode = core->busRead16(core, address);
 					ARMDecodeThumb(opcode, &info);
+
+					if (info.mnemonic == ARM_MN_BL) {
+						struct ARMInstructionInfo info2, combined;
+
+						uint16_t opcode2 = core->busRead16(core, address + WORD_SIZE_THUMB);
+						ARMDecodeThumb(opcode2, &info2);
+
+						if (ARMDecodeThumbCombine(&info, &info2, &combined)) {
+							memcpy(&info, &combined, sizeof(info));
+							instrIndex++;
+						}
+					}
 				} else {
-					uint32_t opcode = GBALoad32(cpu, address, NULL);
+					uint32_t opcode = core->busRead32(core, address);
 					ARMDecodeARM(opcode, &info);
 				}
 
+				// TODO: PUSH/POP
 				ARMDisassemble(&info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
 				instr.sprintf("0x%08X: %s", address, instrBuffer);
 				m_ui.listCode->addItem(instr);
