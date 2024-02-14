@@ -4,6 +4,8 @@
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/. */
 
+// File created by MSgitstudent and SeeingForward
+
 #include "DebuggerGUI.h"
 
 #include "CoreController.h"
@@ -182,6 +184,44 @@ int DebuggerGUI::getVisibleCodeLinesCount() {
 	return visibleLinesCount;
 }
 
+static void DecodeThumbBranch(mCore *core, ARMInstructionInfo *info, uint32_t address, int *instrIndex) {
+	struct ARMInstructionInfo info2, combined;
+
+	// Decode immediately following instruction
+	uint16_t opcode2 = core->busRead16(core, address + WORD_SIZE_THUMB);
+	ARMDecodeThumb(opcode2, &info2);
+
+	// If this is a proper BL instruction, find out the target address
+	if (ARMDecodeThumbCombine(info, &info2, &combined)) {
+		memcpy(info, &combined, sizeof(*info));
+		*instrIndex += 1;
+	}
+}
+
+static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* instr, quint32 startAddress, int i,
+                                    int* instrIndex, int instrSize, bool isThumb) {
+	char instrBuffer[128] = { 0 };
+	uint32_t address = startAddress + (*instrIndex * instrSize);
+	auto cpu = (struct ARMCore*) core->cpu;
+
+	if (isThumb) {
+		uint16_t opcode = core->busRead16(core, address);
+		ARMDecodeThumb(opcode, info);
+
+		// Handle instructions with BL mnemonic (2x 2-bytes)
+		if (info->mnemonic == ARM_MN_BL) {
+			DecodeThumbBranch(core, info, address, instrIndex);
+		}
+	} else {
+		uint32_t opcode = core->busRead32(core, address);
+		ARMDecodeARM(opcode, info);
+	}
+
+	// TODO: PUSH/POP
+	ARMDisassemble(info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
+	instr->sprintf("0x%08X: %s", address, instrBuffer);
+}
+
 void DebuggerGUI::PrintCode(quint32 startAddress) {
 	m_ui.listCode->clear();
 
@@ -200,49 +240,23 @@ void DebuggerGUI::PrintCode(quint32 startAddress) {
 		}
 	}
 
-	if (printAsm)
+	if (!printAsm)
+		return;
+	
+	if (m_CoreController)
 	{
-		if (m_CoreController) {
-			auto core	 = m_CoreController.get()->thread()->core;
-			auto cpu	 = (struct ARMCore*) core->cpu;
-			const bool isThumb = m_isThumb;
+		auto core	 = m_CoreController.get()->thread()->core;
+		const bool isThumb = m_isThumb;
 
-			int visibleLinesCount = getVisibleCodeLinesCount();
+		int visibleLinesCount = getVisibleCodeLinesCount();
 
-			const int instrSize   = (isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
+		const int instrSize   = (isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
 
-			char instrBuffer[128] = { 0 };
-
-			QString instr = "";
-			struct ARMInstructionInfo info;
-			for (int i = 0, instrIndex = 0; i < visibleLinesCount; i++, instrIndex++) {
-				uint32_t address = startAddress + (instrIndex * instrSize);
-
-				if (isThumb) {
-					uint16_t opcode = core->busRead16(core, address);
-					ARMDecodeThumb(opcode, &info);
-
-					if (info.mnemonic == ARM_MN_BL) {
-						struct ARMInstructionInfo info2, combined;
-
-						uint16_t opcode2 = core->busRead16(core, address + WORD_SIZE_THUMB);
-						ARMDecodeThumb(opcode2, &info2);
-
-						if (ARMDecodeThumbCombine(&info, &info2, &combined)) {
-							memcpy(&info, &combined, sizeof(info));
-							instrIndex++;
-						}
-					}
-				} else {
-					uint32_t opcode = core->busRead32(core, address);
-					ARMDecodeARM(opcode, &info);
-				}
-
-				// TODO: PUSH/POP
-				ARMDisassemble(&info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
-				instr.sprintf("0x%08X: %s", address, instrBuffer);
-				m_ui.listCode->addItem(instr);
-			}
+		struct ARMInstructionInfo info;
+		QString instr = "";
+		for (int i = 0, instrIndex = 0; i < visibleLinesCount; i++, instrIndex++) {
+			DecodeInstruction(core, &info, &instr, startAddress, i, &instrIndex, instrSize, isThumb);
+			m_ui.listCode->addItem(instr);
 		}
 	}
 }
