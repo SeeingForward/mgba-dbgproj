@@ -265,7 +265,7 @@ static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* in
 	ARMDisassemble(info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
 
 	if (isThumb) {
-		instr->sprintf("0x%08X: %04X   %s", address, opcode, instrBuffer);
+		instr->sprintf("0x%08X: %04X   %s", address, (uint16_t)opcode, instrBuffer);
 	} else {
 		instr->sprintf("0x%08X: %08X   %s", address, opcode, instrBuffer);
 	}
