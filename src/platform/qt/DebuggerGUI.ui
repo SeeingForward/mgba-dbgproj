@@ -28,6 +28,9 @@
      <height>1</height>
     </size>
    </property>
+   <property name="toolTip">
+    <string>A list of user-defined symbols for any valid address.</string>
+   </property>
    <property name="sortingEnabled">
     <bool>true</bool>
    </property>
@@ -52,7 +55,7 @@
    <property name="geometry">
     <rect>
      <x>390</x>
-     <y>10</y>
+     <y>30</y>
      <width>41</width>
      <height>24</height>
     </rect>
@@ -71,9 +74,9 @@
    <property name="geometry">
     <rect>
      <x>460</x>
-     <y>10</y>
+     <y>30</y>
      <width>121</width>
-     <height>371</height>
+     <height>351</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -81,6 +84,10 @@
      <horstretch>0</horstretch>
      <verstretch>0</verstretch>
     </sizepolicy>
+   </property>
+   <property name="toolTip">
+    <string>Allows to view CPU registers.
+They can be edited when emulation is paused.</string>
    </property>
    <property name="sizeAdjustPolicy">
     <enum>QAbstractScrollArea::AdjustToContents</enum>
@@ -273,9 +280,9 @@
    <property name="geometry">
     <rect>
      <x>10</x>
-     <y>10</y>
+     <y>30</y>
      <width>371</width>
-     <height>341</height>
+     <height>321</height>
     </rect>
    </property>
    <property name="font">
@@ -284,6 +291,9 @@
      <pointsize>8</pointsize>
     </font>
    </property>
+   <property name="toolTip">
+    <string>Displays the Assembly instructions of the loaded ROM.</string>
+   </property>
   </widget>
   <widget class="QLabel" name="labelGotoAddress">
    <property name="geometry">
@@ -291,8 +301,12 @@
      <x>10</x>
      <y>360</y>
      <width>49</width>
-     <height>16</height>
+     <height>21</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>The address to jump to in the Assembly-View,
+when the Return key or the &quot;Go To&quot;button  is pressed.</string>
    </property>
    <property name="text">
     <string>Address:</string>
@@ -307,6 +321,10 @@
      <height>24</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>The address to jump to in the Assembly-View,
+when the Return key or the &quot;Go To&quot;button  is pressed.</string>
+   </property>
   </widget>
   <widget class="QPushButton" name="btnGoTo">
    <property name="geometry">
@@ -316,6 +334,9 @@
      <width>41</width>
      <height>24</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>Jump to the address specified in the &quot;Address:&quot; line in the Assembly-View.</string>
    </property>
    <property name="text">
     <string>Go To</string>
@@ -330,6 +351,9 @@
      <height>22</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>Switch between ARM- and Thumb-CPU-Modes in the Assembly-View.</string>
+   </property>
    <property name="text">
     <string>Thumb-Code</string>
    </property>
@@ -343,6 +367,9 @@
      <height>151</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>A list of all breakpoints set by the user.</string>
+   </property>
   </widget>
   <widget class="QLabel" name="labelBreakpoints">
    <property name="geometry">
@@ -352,6 +379,9 @@
      <width>71</width>
      <height>16</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>A list of all breakpoints set by the user.</string>
    </property>
    <property name="text">
     <string>Breakpoints</string>
@@ -366,6 +396,9 @@
      <height>20</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>Add symbol to the table.</string>
+   </property>
    <property name="text">
     <string>+</string>
    </property>
@@ -378,6 +411,9 @@
      <width>20</width>
      <height>20</height>
     </rect>
+   </property>
+   <property name="toolTip">
+    <string>Remove highlit symbol from the table.</string>
    </property>
    <property name="text">
     <string>-</string>
@@ -392,8 +428,44 @@
      <height>16</height>
     </rect>
    </property>
+   <property name="toolTip">
+    <string>A list of user-defined symbols for any valid address.</string>
+   </property>
    <property name="text">
     <string>Symbols</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="labelRegisters">
+   <property name="geometry">
+    <rect>
+     <x>460</x>
+     <y>10</y>
+     <width>121</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Allows to view CPU registers.
+They can be edited when emulation is paused.</string>
+   </property>
+   <property name="text">
+    <string>CPU-Registers</string>
+   </property>
+  </widget>
+  <widget class="QLabel" name="label">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>371</width>
+     <height>16</height>
+    </rect>
+   </property>
+   <property name="toolTip">
+    <string>Displays the Assembly instructions of the loaded ROM.</string>
+   </property>
+   <property name="text">
+    <string>CPU-Instructions</string>
    </property>
   </widget>
  </widget>
