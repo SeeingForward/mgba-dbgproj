@@ -94,8 +94,8 @@ static int _decodeRegisterList(int list, char* buffer, int blen) {
 				}
 				written = _decodeRegister(end, buffer, blen);
 				ADVANCE(written);
-				strlcpy(buffer, ",", blen);
-				ADVANCE(1);
+				strlcpy(buffer, ", ", blen);
+				ADVANCE(2);
 				start = i;
 				end = i;
 			}
@@ -435,20 +435,39 @@ int ARMDisassemble(const struct ARMInstructionInfo* info, struct ARMCore* cpu, c
 	default:
 		break;
 	}
-	written = snprintf(buffer, blen, "%s%s%s ", mnemonic, cond, flags);
-	ADVANCE(written);
+
+	if (info->mnemonic != ARM_MN_LDM && info->mnemonic != ARM_MN_STM) {
+		written = snprintf(buffer, blen, "%s%s%s ", mnemonic, cond, flags);
+		ADVANCE(written);
+	}
 
 	switch (info->mnemonic) {
 	case ARM_MN_LDM:
 	case ARM_MN_STM:
-		written = _decodeRegister(info->memory.baseReg, buffer, blen);
-		ADVANCE(written);
-		if (info->memory.format & ARM_MEMORY_WRITEBACK) {
-			strlcpy(buffer, "!", blen);
-			ADVANCE(1);
+		if (info->memory.baseReg == ARM_SP) {
+			switch (info->mnemonic) {
+			case ARM_MN_STM: {
+				strlcpy(buffer, "push ", blen);
+				ADVANCE(5);
+			} break;
+
+			case ARM_MN_LDM: {
+				strlcpy(buffer, "pop ", blen);
+				ADVANCE(4);
+			} break;
+			}
+		} else {
+			written = _decodeRegister(info->memory.baseReg, buffer, blen);
+			ADVANCE(written);
+
+			if (info->memory.format & ARM_MEMORY_WRITEBACK) {
+				strlcpy(buffer, "!", blen);
+				ADVANCE(1);
+			}
+			strlcpy(buffer, ", ", blen);
+			ADVANCE(2);
 		}
-		strlcpy(buffer, ", ", blen);
-		ADVANCE(2);
+
 		written = _decodeRegisterList(info->op1.immediate, buffer, blen);
 		ADVANCE(written);
 		if (info->memory.format & ARM_MEMORY_SPSR_SWAP) {

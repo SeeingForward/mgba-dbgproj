@@ -88,11 +88,11 @@ static int getRegisterIndex(QString addressLine) {
 			index = -1;
 		}
 	} else if (token == "sp") {
-		index = 13;
+		index = ARM_SP;
 	} else if (token == "lr") {
-		index = 14;
+		index = ARM_LR;
 	} else if (token == "pc") {
-		index = 15;
+		index = ARM_PC;
 	}
 
 	return index;
