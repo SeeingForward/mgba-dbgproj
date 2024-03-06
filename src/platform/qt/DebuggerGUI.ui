@@ -48,25 +48,6 @@
     </property>
    </column>
   </widget>
-  <widget class="QPushButton" name="btnSource">
-   <property name="enabled">
-    <bool>false</bool>
-   </property>
-   <property name="geometry">
-    <rect>
-     <x>390</x>
-     <y>30</y>
-     <width>41</width>
-     <height>24</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Switch between Assembly- and Source-View if an ELF with Debug-Info was loaded.</string>
-   </property>
-   <property name="text">
-    <string>Source</string>
-   </property>
-  </widget>
   <widget class="QTableWidget" name="registers">
    <property name="enabled">
     <bool>true</bool>
@@ -281,7 +262,7 @@ They can be edited when emulation is paused.</string>
     <rect>
      <x>10</x>
      <y>30</y>
-     <width>371</width>
+     <width>441</width>
      <height>321</height>
     </rect>
    </property>

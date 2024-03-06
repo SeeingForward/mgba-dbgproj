@@ -225,24 +225,6 @@ static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* in
 void DebuggerGUI::PrintCode(quint32 startAddress) {
 	m_ui.listCode->clear();
 
-	bool printAsm = false;
-	bool debugInfoLoaded = false;
-
-	if (!printAsm) {
-		// TODO: Load and display source code
-
-		if (debugInfoLoaded) {
-			m_guiController->log("TODO:  Displaying source code not yet implemented\n");
-		} else {
-			m_guiController->log("ERROR: No source code loaded.\n");
-			m_guiController->log("       Defaulting to Assembly view.\n");
-			printAsm = true;
-		}
-	}
-
-	if (!printAsm)
-		return;
-	
 	if (m_CoreController)
 	{
 		auto core	 = m_CoreController.get()->thread()->core;
