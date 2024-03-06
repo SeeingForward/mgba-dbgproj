@@ -240,14 +240,15 @@ static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* in
                                     int* instrIndex, int instrSize, bool isThumb) {
 	char instrBuffer[128] = { 0 };
 	uint32_t address = startAddress + (*instrIndex * instrSize);
+	uint32_t opcode = 0;
 	auto cpu = (struct ARMCore*) core->cpu;
 
 	if (isThumb) {
 		// Clear least-significant bit, so we don't decode unaligned addresses
 		address &= ~0x1;
 
-		uint16_t opcode = core->busRead16(core, address);
-		ARMDecodeThumb(opcode, info);
+		opcode = core->busRead16(core, address);
+		ARMDecodeThumb((uint16_t)opcode, info);
 
 		// Handle instructions with BL mnemonic (2x 2-bytes)
 		if (info->mnemonic == ARM_MN_BL) {
@@ -257,13 +258,17 @@ static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* in
 		// Clear least-significant bits, so we don't decode unaligned addresses
 		address &= ~0x3;
 
-		uint32_t opcode = core->busRead32(core, address);
+		opcode = core->busRead32(core, address);
 		ARMDecodeARM(opcode, info);
 	}
 
-	// TODO: PUSH/POP
 	ARMDisassemble(info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
-	instr->sprintf("0x%08X: %s", address, instrBuffer);
+
+	if (isThumb) {
+		instr->sprintf("0x%08X: %04X   %s", address, opcode, instrBuffer);
+	} else {
+		instr->sprintf("0x%08X: %08X   %s", address, opcode, instrBuffer);
+	}
 }
 
 void DebuggerGUI::PrintCode(quint32 startAddress) {
