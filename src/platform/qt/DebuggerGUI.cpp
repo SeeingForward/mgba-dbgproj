@@ -77,20 +77,58 @@ void DebuggerGUI::HandleAddressLineReturnPressed() {
 	HandleAddressButtonClicked(true);
 }
 
-void DebuggerGUI::HandleAddressButtonClicked(bool checked) {
-	// Get address value from textbox
-	QString line     = m_ui.txtAddressLine->text();
-	uint32_t address = 0;
+static int getRegisterIndex(QString addressLine) {
+	int index = -1;
+	QString token = addressLine.trimmed().toLower();
 
+	if (token.startsWith('r', Qt::CaseInsensitive)) {
+		index = token.remove(0, 1).toInt(0, 10);
+
+		if (index < 0 || index >= GBA_GPR_COUNT) {
+			index = -1;
+		}
+	} else if (token == "sp") {
+		index = 13;
+	} else if (token == "lr") {
+		index = 14;
+	} else if (token == "pc") {
+		index = 15;
+	}
+
+	return index;
+}
+
+// Get address value from address line textbox
+static uint32_t getLineAddress(mCore* core, QString line) {
+	uint32_t address = -1;
+	
 	if (line.contains("0x")) {
 		address = line.remove("0x", Qt::CaseInsensitive).toInt(nullptr, 16);
 	} else if (!line.isEmpty()) {
-		address = line.toInt(0, 16);
-	} else {
-		return;
+		int regIndex = getRegisterIndex(line);
+
+		if (regIndex != -1) {
+			if (core) {
+				auto cpu = (struct ARMCore*) core->cpu;
+
+				if (cpu) {
+					address = (uint32_t) cpu->gprs[regIndex];
+				}
+			}
+		} else {
+			address = line.toInt(0, 16);
+		}
 	}
 
-	if (address != 0) {
+	return address;
+}
+
+void DebuggerGUI::HandleAddressButtonClicked(bool checked) {
+	auto core        = m_CoreController.get()->thread()->core;
+	QString line     = m_ui.txtAddressLine->text();
+	uint32_t address = getLineAddress(core, line);
+
+	if (address != -1) {
 		int linesCount      = m_ui.listCode->count();
 		int wordSize        = (m_isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
 		uint32_t endAddress = m_codeAddress + linesCount * wordSize;
@@ -104,7 +142,7 @@ void DebuggerGUI::HandleAddressButtonClicked(bool checked) {
 			PrintCode(m_codeAddress);
 		}
 	} else {
-		m_codeAddress = address;
+		m_codeAddress = 0;
 		PrintCode(m_codeAddress);
 	}
 }
@@ -205,6 +243,9 @@ static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* in
 	auto cpu = (struct ARMCore*) core->cpu;
 
 	if (isThumb) {
+		// Clear least-significant bit, so we don't decode unaligned addresses
+		address &= ~0x1;
+
 		uint16_t opcode = core->busRead16(core, address);
 		ARMDecodeThumb(opcode, info);
 
@@ -213,6 +254,9 @@ static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* in
 			DecodeThumbBranch(core, info, address, instrIndex);
 		}
 	} else {
+		// Clear least-significant bits, so we don't decode unaligned addresses
+		address &= ~0x3;
+
 		uint32_t opcode = core->busRead32(core, address);
 		ARMDecodeARM(opcode, info);
 	}
@@ -228,16 +272,15 @@ void DebuggerGUI::PrintCode(quint32 startAddress) {
 	if (m_CoreController)
 	{
 		auto core	 = m_CoreController.get()->thread()->core;
-		const bool isThumb = m_isThumb;
 
 		int visibleLinesCount = getVisibleCodeLinesCount();
 
-		const int instrSize   = (isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
+		const int instrSize = (m_isThumb) ? WORD_SIZE_THUMB : WORD_SIZE_ARM;
 
 		struct ARMInstructionInfo info;
 		QString instr = "";
 		for (int i = 0, instrIndex = 0; i < visibleLinesCount; i++, instrIndex++) {
-			DecodeInstruction(core, &info, &instr, startAddress, i, &instrIndex, instrSize, isThumb);
+			DecodeInstruction(core, &info, &instr, startAddress, i, &instrIndex, instrSize, m_isThumb);
 			m_ui.listCode->addItem(instr);
 		}
 	}
