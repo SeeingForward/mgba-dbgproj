@@ -26,6 +26,11 @@ DebuggerGUI(DebuggerGUIController* controller,
 	void DebuggerGUI::PrintCode(uint32_t startAddress = 0);
 
 public slots:
+	void DebuggerGUI::AddSymbol();
+	void DebuggerGUI::RemoveSymbol();
+	void DebuggerGUI::EditSymbol();
+	void DebuggerGUI::HandleSymbolTableCellClicked(int row, int column);
+	void DebuggerGUI::HandleSymbolTableCellChanged(int row, int column);
 	void DebuggerGUI::HandleGamePause();
 	void DebuggerGUI::HandleGameResume();
 	void DebuggerGUI::UpdateWidgets();
@@ -42,6 +47,9 @@ private:
 	int getVisibleCodeLinesCount(void);
 
 	Ui::DebuggerGUI m_ui;
+
+	struct mDebuggerSymbols *m_symbols;
+	QString m_symLastClickedContent;
 	
 	// If paused, allow user to edit values
 	bool m_paused = false;

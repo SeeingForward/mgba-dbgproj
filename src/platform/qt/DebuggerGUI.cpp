@@ -14,6 +14,7 @@
 
 #include "mgba/internal/arm/arm.h"
 #include "mgba/internal/gba/memory.h" // GBALoad8/16/32
+#include "mgba/internal/debugger/symbols.h"
 
 #include <QKeyEvent>
 #include <qt5/QtWidgets/qlineedit.h>
@@ -23,6 +24,9 @@ using namespace QGBA;
 #define GBA_GPR_COUNT 16
 #define GBA_ROM_BASE  0x08000000
 
+#define SYMTBL_COL_NAME 0
+#define SYMTBL_COL_ADDR 1
+
 DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 						 std::shared_ptr<CoreController> coreController,
                          QWidget* parent)
@@ -31,6 +35,11 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
     , m_CoreController(coreController)
     , m_codeAddress(GBA_ROM_BASE) {
 	m_ui.setupUi(this);
+
+	connect(m_ui.btnSymbolAdd, &QAbstractButton::clicked, this, &DebuggerGUI::AddSymbol);
+	connect(m_ui.btnSymbolRemove, &QAbstractButton::clicked, this, &DebuggerGUI::RemoveSymbol);
+	connect(m_ui.listSymbols, &QTableWidget::cellChanged, this, &DebuggerGUI::HandleSymbolTableCellChanged);
+	connect(m_ui.listSymbols, &QTableWidget::cellClicked, this, &DebuggerGUI::HandleSymbolTableCellClicked);
 
 	connect(m_ui.registers, &QTableWidget::cellChanged, this, &DebuggerGUI::HandleChangedRegisterCell);
 	connect(m_ui.btnGoTo,   &QPushButton::clicked,      this, &DebuggerGUI::HandleAddressButtonClicked);
@@ -45,27 +54,122 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 		connect(coreCnt, &CoreController::unpaused, this, &DebuggerGUI::HandleGameResume);
 		connect(coreCnt, &CoreController::frameAvailable, this, &DebuggerGUI::UpdateWidgets);
 
-		// TODO: This makes the Resume-connect pointless, since we enable editing by clicking the Table
-		//connect(m_ui.registers, &QTableView::clicked, this, &DebuggerGUI::HandleGamePause);
-
 		// Find the target of the very first instruction, which has got to be a branch in official games.
 		struct ARMInstructionInfo info;
-		struct ARMCore* cpu = (struct ARMCore*)coreCnt->thread()->core->cpu;
+		struct mCore *core  = coreCnt->thread()->core;
+		struct ARMCore* cpu = (struct ARMCore*) core->cpu;
 		uint32_t opcode     = GBALoad32(cpu, m_codeAddress, NULL);
 
 		ARMDecodeARM(opcode, &info);
 
 		if (info.mnemonic == ARM_MN_B || info.mnemonic == ARM_MN_BL) {
-			int offset = info.op1.reg + 0x8;
+			int offset = info.op1.reg + 2*WORD_SIZE_ARM;
 			m_codeAddress += offset;
 		}
+
+		// Create symbol table if it doesn't exist.
+		core->symbolTable = mDebuggerSymbolTableCreate();
+		m_symbols = core->symbolTable;
 	}
 
 	QString hex("0x");
 	hex.append(QString("%1").arg(m_codeAddress, 8, 16, QLatin1Char('0')).toUpper());
 	m_ui.txtAddressLine->setText(hex);
-	
+
 	PrintCode(m_codeAddress);
+}
+
+void DebuggerGUI::AddSymbol(void) {
+	uint32_t address = 0;
+
+	if (m_CoreController) {
+		auto coreCnt = m_CoreController.get();
+		struct mCore* core = coreCnt->thread()->core;
+
+		mDebuggerSymbolAdd(core->symbolTable, "new_entry", address, -1);
+
+		int newRowID = m_ui.listSymbols->rowCount();
+		m_ui.listSymbols->insertRow(newRowID);
+		m_ui.listSymbols->setItem(newRowID, SYMTBL_COL_NAME, new QTableWidgetItem("new_entry"));
+		m_ui.listSymbols->setItem(newRowID, SYMTBL_COL_ADDR, new QTableWidgetItem("0x00000000"));
+	}
+}
+
+void DebuggerGUI::RemoveSymbol(void) {
+	if (m_CoreController) {
+		auto coreCnt = m_CoreController.get();
+		struct mCore* core = coreCnt->thread()->core;
+
+		mDebuggerSymbolRemove(core->symbolTable, "new_entry");
+	}
+}
+
+void DebuggerGUI::EditSymbol(void) {
+	if (m_CoreController) {
+		auto coreCnt = m_CoreController.get();
+		struct mCore* core = coreCnt->thread()->core;
+
+		mDebuggerSymbolRemove(core->symbolTable, "new_entry");
+	}
+}
+
+static void renameSymbol(mDebuggerSymbols* symbols, std::string prevName, std::string newName) {
+	int32_t address;
+	int segment;
+	bool found = mDebuggerSymbolLookup(symbols, prevName.c_str(), &address, &segment);
+
+	if (found) {
+		mDebuggerSymbolAdd(symbols, newName.c_str(), address, -1);
+	}
+}
+
+static void changeSymbolAddress(mDebuggerSymbols* symbols, std::string symbol, uint32_t newAddress) {
+	int32_t address;
+	int segment;
+	const char *c_symbol = symbol.c_str();
+	bool found = mDebuggerSymbolLookup(symbols, c_symbol, &address, &segment);
+
+	if (found) {
+		mDebuggerSymbolRemove(symbols, c_symbol);
+	}
+
+	mDebuggerSymbolAdd(symbols, c_symbol, newAddress, -1);
+}
+
+void DebuggerGUI::HandleSymbolTableCellChanged(int row, int column) {
+	QString prevContent = m_symLastClickedContent;
+	QString newContent  = m_ui.listSymbols->item(row, column)->text();
+
+	auto p = prevContent.toStdString();
+	auto n = newContent.toStdString();
+
+	switch (column) {
+	case SYMTBL_COL_NAME: {
+		if (!prevContent.isEmpty()) {
+			renameSymbol(m_symbols, p, n);
+		}
+	} break;
+
+	case SYMTBL_COL_ADDR: {
+		if (!prevContent.isEmpty()) {
+			QString symbol = m_ui.listSymbols->item(row, SYMTBL_COL_NAME)->text();
+			QString address = newContent.trimmed();
+			
+			if (address.startsWith("0x")) {
+				changeSymbolAddress(m_symbols, symbol.toStdString(), address.remove(0, 2).toUInt(nullptr, 16));
+			} else {
+				changeSymbolAddress(m_symbols, symbol.toStdString(), address.toUInt(nullptr, 10));
+			}
+		}
+	} break;
+	}
+}
+
+void DebuggerGUI::HandleSymbolTableCellClicked(int row, int column) {
+	auto cell = m_ui.listSymbols->item(row, column);
+	if (cell) {
+		m_symLastClickedContent = cell->text();
+	}
 }
 
 void DebuggerGUI::HandleThumbCheckboxClicked(bool checked) {
@@ -149,11 +253,10 @@ void DebuggerGUI::HandleAddressButtonClicked(bool checked) {
 
 void DebuggerGUI::HandleChangedRegisterCell(int row, int column) {
 	if (m_CoreController) {
-		//ARMRegisterFile* arf = m_guiController->getGbaRegisters();
 		bool userCanEdit = !m_ui.registers->editTriggers().testFlag(QAbstractItemView::EditTrigger::NoEditTriggers);
 
 
-		if (m_paused && userCanEdit && column == 0 && row < GBA_GPR_COUNT) {			
+		if (m_paused && userCanEdit && column == 0 && row < GBA_GPR_COUNT) {
 			QString regValue = m_ui.registers->item(row, column)->text();
 
 			uint32_t value;
@@ -236,7 +339,8 @@ static void DecodeThumbBranch(mCore *core, ARMInstructionInfo *info, uint32_t ad
 	}
 }
 
-static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* instr, quint32 startAddress, int i,
+static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, struct mDebuggerSymbols* symbols, QString* instr,
+                              quint32 startAddress, int i,
                                     int* instrIndex, int instrSize, bool isThumb) {
 	char instrBuffer[128] = { 0 };
 	uint32_t address = startAddress + (*instrIndex * instrSize);
@@ -262,7 +366,7 @@ static void DecodeInstruction(mCore* core, ARMInstructionInfo* info, QString* in
 		ARMDecodeARM(opcode, info);
 	}
 
-	ARMDisassemble(info, cpu, NULL, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
+	ARMDisassemble(info, cpu, symbols, address + (2 * instrSize), instrBuffer, sizeof(instrBuffer));
 
 	if (isThumb) {
 		instr->sprintf("0x%08X: %04X   %s", address, (uint16_t)opcode, instrBuffer);
@@ -285,7 +389,7 @@ void DebuggerGUI::PrintCode(quint32 startAddress) {
 		struct ARMInstructionInfo info;
 		QString instr = "";
 		for (int i = 0, instrIndex = 0; i < visibleLinesCount; i++, instrIndex++) {
-			DecodeInstruction(core, &info, &instr, startAddress, i, &instrIndex, instrSize, m_isThumb);
+			DecodeInstruction(core, &info, m_symbols, &instr, startAddress, i, &instrIndex, instrSize, m_isThumb);
 			m_ui.listCode->addItem(instr);
 		}
 	}
