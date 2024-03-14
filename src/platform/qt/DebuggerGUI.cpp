@@ -167,6 +167,7 @@ void DebuggerGUI::HandleSymbolTableCellChanged(int row, int column) {
 
 void DebuggerGUI::HandleSymbolTableCellClicked(int row, int column) {
 	auto cell = m_ui.listSymbols->item(row, column);
+
 	if (cell) {
 		m_symLastClickedContent = cell->text();
 	}
@@ -203,7 +204,7 @@ static int getRegisterIndex(QString addressLine) {
 }
 
 // Get address value from address line textbox
-static uint32_t getLineAddress(mCore* core, QString line) {
+uint32_t DebuggerGUI::getLineAddress(mCore* core, QString line) {
 	uint32_t address = -1;
 	
 	if (line.contains("0x")) {
@@ -220,7 +221,15 @@ static uint32_t getLineAddress(mCore* core, QString line) {
 				}
 			}
 		} else {
-			address = line.toInt(0, 16);
+			int32_t symbolAddress;
+			int segment;
+			bool found = mDebuggerSymbolLookup(m_symbols, line.toStdString().c_str(), &symbolAddress, &segment);
+
+			if (found) {
+				address = symbolAddress;
+			} else {
+				address = line.toInt(0, 16);
+			}
 		}
 	}
 

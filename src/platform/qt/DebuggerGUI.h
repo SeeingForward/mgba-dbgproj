@@ -45,6 +45,7 @@ signals:
 
 private:
 	int getVisibleCodeLinesCount(void);
+	uint32_t getLineAddress(mCore* core, QString line);
 
 	Ui::DebuggerGUI m_ui;
 
