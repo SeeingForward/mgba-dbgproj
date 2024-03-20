@@ -54,12 +54,12 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 		connect(coreCnt, &CoreController::unpaused, this, &DebuggerGUI::HandleGameResume);
 		connect(coreCnt, &CoreController::frameAvailable, this, &DebuggerGUI::UpdateWidgets);
 
-		// Find the target of the very first instruction, which has got to be a branch in official games.
 		struct ARMInstructionInfo info;
 		struct mCore *core  = coreCnt->thread()->core;
 		struct ARMCore* cpu = (struct ARMCore*) core->cpu;
-		uint32_t opcode     = GBALoad32(cpu, m_codeAddress, NULL);
 
+		// Find the target of the very first instruction, which has got to be a branch in official games.
+		uint32_t opcode     = GBALoad32(cpu, m_codeAddress, NULL);
 		ARMDecodeARM(opcode, &info);
 
 		if (info.mnemonic == ARM_MN_B || info.mnemonic == ARM_MN_BL) {
@@ -77,6 +77,17 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 	m_ui.txtAddressLine->setText(hex);
 
 	PrintCode(m_codeAddress);
+}
+
+int DebuggerGUI::parseNumber(QString str) {
+	int value;
+	if (str.startsWith("0x", Qt::CaseInsensitive)) {
+		value = str.remove("0x", Qt::CaseInsensitive).toInt(nullptr, 16);
+	} else {
+		value = str.toInt(nullptr, 10);
+	}
+
+	return value;
 }
 
 void DebuggerGUI::AddSymbol(void) {
@@ -153,16 +164,15 @@ void DebuggerGUI::HandleSymbolTableCellChanged(int row, int column) {
 	case SYMTBL_COL_ADDR: {
 		if (!prevContent.isEmpty()) {
 			QString symbol = m_ui.listSymbols->item(row, SYMTBL_COL_NAME)->text();
-			QString address = newContent.trimmed();
+			QString addressString = newContent.trimmed();
 			
-			if (address.startsWith("0x")) {
-				changeSymbolAddress(m_symbols, symbol.toStdString(), address.remove(0, 2).toUInt(nullptr, 16));
-			} else {
-				changeSymbolAddress(m_symbols, symbol.toStdString(), address.toUInt(nullptr, 10));
-			}
+			uint32_t newAddress = parseNumber(addressString);
+			changeSymbolAddress(m_symbols, symbol.toStdString(), newAddress);
 		}
 	} break;
 	}
+
+	PrintCode(m_codeAddress);
 }
 
 void DebuggerGUI::HandleSymbolTableCellClicked(int row, int column) {
@@ -264,16 +274,11 @@ void DebuggerGUI::HandleChangedRegisterCell(int row, int column) {
 	if (m_CoreController) {
 		bool userCanEdit = !m_ui.registers->editTriggers().testFlag(QAbstractItemView::EditTrigger::NoEditTriggers);
 
-
+		// Set register value
 		if (m_paused && userCanEdit && column == 0 && row < GBA_GPR_COUNT) {
-			QString regValue = m_ui.registers->item(row, column)->text();
+			QString registerValueString = m_ui.registers->item(row, column)->text();
 
-			uint32_t value;
-			if (regValue.startsWith("0x", Qt::CaseInsensitive)) {
-				value = regValue.remove("0x", Qt::CaseInsensitive).toInt(nullptr, 16);
-			} else {
-				value = regValue.toInt(nullptr, 10);
-			}
+			uint32_t value = parseNumber(registerValueString);
 
 			m_guiController->setGbaRegister(row, value);
 		}
@@ -286,7 +291,7 @@ void DebuggerGUI::UpdateRegisters() {
 	for (int i = 0; i < GBA_GPR_COUNT; i++) {
 		auto item = m_ui.registers->item(i, 0);
 		if (item) {
-			// Since 0x should not be capitalized, it´s created separately.
+			// Capitalize hex-values, but not "0x".
 			QString hex("0x");
 			hex.append(QString("%1").arg((uint32_t)arf->gprs[i], 8, 16, QLatin1Char('0')).toUpper());
 			item->setText(hex);

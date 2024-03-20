@@ -24,6 +24,7 @@ DebuggerGUI(DebuggerGUIController* controller,
 			std::shared_ptr<CoreController> coreController,
 	        QWidget* parent = nullptr);
 	void DebuggerGUI::PrintCode(uint32_t startAddress = 0);
+int DebuggerGUI::parseNumber(QString str);
 
 public slots:
 	void DebuggerGUI::AddSymbol();
@@ -44,6 +45,7 @@ public slots:
 signals:
 
 private:
+
 	int getVisibleCodeLinesCount(void);
 	uint32_t getLineAddress(mCore* core, QString line);
 
@@ -51,6 +53,7 @@ private:
 
 	struct mDebuggerSymbols *m_symbols;
 	QString m_symLastClickedContent;
+
 	
 	// If paused, allow user to edit values
 	bool m_paused = false;
