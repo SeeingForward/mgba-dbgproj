@@ -37,7 +37,6 @@ DebuggerGUI::DebuggerGUI(DebuggerGUIController* controller,
 	m_ui.setupUi(this);
 
 	connect(m_ui.btnSymbolAdd, &QAbstractButton::clicked, this, &DebuggerGUI::AddSymbol);
-	connect(m_ui.btnSymbolRemove, &QAbstractButton::clicked, this, &DebuggerGUI::RemoveSymbol);
 	connect(m_ui.listSymbols, &QTableWidget::cellChanged, this, &DebuggerGUI::HandleSymbolTableCellChanged);
 	connect(m_ui.listSymbols, &QTableWidget::cellClicked, this, &DebuggerGUI::HandleSymbolTableCellClicked);
 
@@ -103,24 +102,6 @@ void DebuggerGUI::AddSymbol(void) {
 		m_ui.listSymbols->insertRow(newRowID);
 		m_ui.listSymbols->setItem(newRowID, SYMTBL_COL_NAME, new QTableWidgetItem("new_entry"));
 		m_ui.listSymbols->setItem(newRowID, SYMTBL_COL_ADDR, new QTableWidgetItem("0x00000000"));
-	}
-}
-
-void DebuggerGUI::RemoveSymbol(void) {
-	if (m_CoreController) {
-		auto coreCnt = m_CoreController.get();
-		struct mCore* core = coreCnt->thread()->core;
-
-		mDebuggerSymbolRemove(core->symbolTable, "new_entry");
-	}
-}
-
-void DebuggerGUI::EditSymbol(void) {
-	if (m_CoreController) {
-		auto coreCnt = m_CoreController.get();
-		struct mCore* core = coreCnt->thread()->core;
-
-		mDebuggerSymbolRemove(core->symbolTable, "new_entry");
 	}
 }
 

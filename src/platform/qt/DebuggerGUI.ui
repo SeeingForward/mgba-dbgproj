@@ -16,9 +16,9 @@
   <widget class="QTableWidget" name="listSymbols">
    <property name="geometry">
     <rect>
-     <x>8</x>
+     <x>367</x>
      <y>410</y>
-     <width>300</width>
+     <width>221</width>
      <height>151</height>
     </rect>
    </property>
@@ -262,8 +262,8 @@ They can be edited when emulation is paused.</string>
     <rect>
      <x>10</x>
      <y>30</y>
-     <width>441</width>
-     <height>321</height>
+     <width>351</width>
+     <height>531</height>
     </rect>
    </property>
    <property name="font">
@@ -279,8 +279,8 @@ They can be edited when emulation is paused.</string>
   <widget class="QLabel" name="labelGotoAddress">
    <property name="geometry">
     <rect>
-     <x>10</x>
-     <y>360</y>
+     <x>370</x>
+     <y>30</y>
      <width>49</width>
      <height>21</height>
     </rect>
@@ -296,9 +296,9 @@ when the Return key or the &quot;Go To&quot;button  is pressed.</string>
   <widget class="QLineEdit" name="txtAddressLine">
    <property name="geometry">
     <rect>
-     <x>60</x>
-     <y>360</y>
-     <width>113</width>
+     <x>370</x>
+     <y>50</y>
+     <width>71</width>
      <height>24</height>
     </rect>
    </property>
@@ -306,12 +306,15 @@ when the Return key or the &quot;Go To&quot;button  is pressed.</string>
     <string>The address to jump to in the Assembly-View,
 when the Return key or the &quot;Go To&quot;button  is pressed.</string>
    </property>
+   <property name="text">
+    <string/>
+   </property>
   </widget>
   <widget class="QPushButton" name="btnGoTo">
    <property name="geometry">
     <rect>
-     <x>180</x>
-     <y>360</y>
+     <x>370</x>
+     <y>80</y>
      <width>41</width>
      <height>24</height>
     </rect>
@@ -326,8 +329,8 @@ when the Return key or the &quot;Go To&quot;button  is pressed.</string>
   <widget class="QCheckBox" name="chkThumb">
    <property name="geometry">
     <rect>
-     <x>230</x>
-     <y>360</y>
+     <x>260</x>
+     <y>10</y>
      <width>101</width>
      <height>22</height>
     </rect>
@@ -339,39 +342,10 @@ when the Return key or the &quot;Go To&quot;button  is pressed.</string>
     <string>Thumb-Code</string>
    </property>
   </widget>
-  <widget class="QListWidget" name="listBreakpoints">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>410</y>
-     <width>261</width>
-     <height>151</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>A list of all breakpoints set by the user.</string>
-   </property>
-  </widget>
-  <widget class="QLabel" name="labelBreakpoints">
-   <property name="geometry">
-    <rect>
-     <x>320</x>
-     <y>390</y>
-     <width>71</width>
-     <height>16</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>A list of all breakpoints set by the user.</string>
-   </property>
-   <property name="text">
-    <string>Breakpoints</string>
-   </property>
-  </widget>
   <widget class="QPushButton" name="btnSymbolAdd">
    <property name="geometry">
     <rect>
-     <x>60</x>
+     <x>420</x>
      <y>390</y>
      <width>20</width>
      <height>20</height>
@@ -384,26 +358,10 @@ when the Return key or the &quot;Go To&quot;button  is pressed.</string>
     <string>+</string>
    </property>
   </widget>
-  <widget class="QPushButton" name="btnSymbolRemove">
-   <property name="geometry">
-    <rect>
-     <x>80</x>
-     <y>390</y>
-     <width>20</width>
-     <height>20</height>
-    </rect>
-   </property>
-   <property name="toolTip">
-    <string>Remove highlit symbol from the table.</string>
-   </property>
-   <property name="text">
-    <string>-</string>
-   </property>
-  </widget>
   <widget class="QLabel" name="labelSymbols">
    <property name="geometry">
     <rect>
-     <x>10</x>
+     <x>370</x>
      <y>390</y>
      <width>49</width>
      <height>16</height>
@@ -438,7 +396,7 @@ They can be edited when emulation is paused.</string>
     <rect>
      <x>10</x>
      <y>10</y>
-     <width>371</width>
+     <width>101</width>
      <height>16</height>
     </rect>
    </property>
