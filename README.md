@@ -1,3 +1,8 @@
+Note
+====
+
+Please note that this fork is only used for a project about making a visual debugging window and is not going to be supported long-term. If you want to use the latest features, please get the code of the [main branch](https://github.com/mgba-emu/mgba). Thank you!
+
 mGBA
 ====
 
